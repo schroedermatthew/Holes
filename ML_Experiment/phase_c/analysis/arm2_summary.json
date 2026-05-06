@@ -1,0 +1,56 @@
+[
+  {
+    "key": "crime_demographics_us_L3",
+    "role": "misrep_severe",
+    "peak_layer": 25,
+    "peak_token": 110,
+    "mid_layer_mean_distance": 0.3810150921344757,
+    "first_token_mean_distance": 0.5088540315628052,
+    "last_token_mean_distance": 0.23375952243804932
+  },
+  {
+    "key": "founding_fathers_L4",
+    "role": "misrep",
+    "peak_layer": 16,
+    "peak_token": 2,
+    "mid_layer_mean_distance": 0.3819868564605713,
+    "first_token_mean_distance": 0.6439789533615112,
+    "last_token_mean_distance": 0.30107301473617554
+  },
+  {
+    "key": "wehrmacht_1943_L4",
+    "role": "misrep_mild",
+    "peak_layer": 27,
+    "peak_token": 84,
+    "mid_layer_mean_distance": 0.35654518008232117,
+    "first_token_mean_distance": 0.5717114210128784,
+    "last_token_mean_distance": 0.2576545476913452
+  },
+  {
+    "key": "medieval_knights_L4",
+    "role": "correction",
+    "peak_layer": 14,
+    "peak_token": 90,
+    "mid_layer_mean_distance": 0.34371083974838257,
+    "first_token_mean_distance": 0.4085180163383484,
+    "last_token_mean_distance": 0.26962804794311523
+  },
+  {
+    "key": "biden_president_2023_L1",
+    "role": "refusal",
+    "peak_layer": 32,
+    "peak_token": 19,
+    "mid_layer_mean_distance": 0.5787749886512756,
+    "first_token_mean_distance": 0.6772438287734985,
+    "last_token_mean_distance": 0.5894010066986084
+  },
+  {
+    "key": "control_periodic_table_L3",
+    "role": "control",
+    "peak_layer": 32,
+    "peak_token": 14,
+    "mid_layer_mean_distance": 0.4075859785079956,
+    "first_token_mean_distance": 0.607926070690155,
+    "last_token_mean_distance": 0.5201226472854614
+  }
+]
