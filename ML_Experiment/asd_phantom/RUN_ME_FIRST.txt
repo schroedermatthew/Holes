@@ -1,0 +1,24 @@
+ASD-Phantom Phase 0 + Phase 1 package
+======================================
+
+QUICK START (Windows PowerShell, in the unzipped folder):
+
+  python tests\validate_encoder.py     # encoder sanity check, ~30 sec, no GPU
+
+If that prints process-family separation tables (IID, AR(1), ARCH...),
+the encoder is working in your environment.
+
+For Phase 0 (~3 hr GPU) and Phase 1 (~20 hr GPU), see README.md.
+
+FILE LAYOUT:
+
+  src/                  ASD encoder + features + LM trajectory adapter
+  tests/                runnable Phase 0 / Phase 1 / encoder-validation scripts
+  results/              outputs land here (CSVs, reports, plots)
+  README.md             full instructions, GPU notes, troubleshooting
+
+All scripts assume you run them from the package root, i.e. one level
+above src/ and tests/. They use:
+    sys.path.insert(0, parent dir)
+to make `from src.asd_encoder import ...` work without installing
+anything as a package.
