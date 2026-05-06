@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phantom Eigenmode — Document Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0e1117;
+    --surface:  #161b27;
+    --surface2: #1e2535;
+    --border:   #2a3347;
+    --text:     #d4cfc8;
+    --muted:    #7a8499;
+    --bright:   #ede8e0;
+    --A:   #c49a3c;
+    --B:   #4a8fa8;
+    --toy: #5a9e78;
+    --num: #a07060;
+    --E:  #5a9e78;
+    --K:  #6b8fb5;
+    --O:  #c49a3c;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.65; }
+
+  header { border-bottom: 1px solid var(--border); padding: 48px 64px 36px; }
+  header h1 { font-family: 'EB Garamond', serif; font-size: 2.4rem; font-weight: 500; color: var(--bright); letter-spacing: -0.01em; line-height: 1.1; margin-bottom: 8px; }
+  header p { color: var(--muted); font-size: 13px; }
+
+  .container { max-width: 1160px; margin: 0 auto; padding: 0 64px 80px; }
+  section { margin-top: 52px; }
+  section > h2 { font-family: 'EB Garamond', serif; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+
+  /* Genesis */
+  .genesis-entry { display: grid; grid-template-columns: 4px 1fr; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .genesis-stripe { background: linear-gradient(to bottom, var(--A), var(--B)); }
+  .genesis-body { padding: 28px 32px; }
+  .genesis-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--A); margin-bottom: 8px; }
+  .genesis-body h3 { font-family: 'EB Garamond', serif; font-size: 1.55rem; font-weight: 500; color: var(--bright); margin-bottom: 12px; line-height: 1.2; }
+  .genesis-body p { color: var(--text); font-size: 13.5px; max-width: 680px; line-height: 1.6; margin-bottom: 20px; }
+  .genesis-link { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 8px 18px; background: rgba(196,154,60,0.12); border: 1px solid rgba(196,154,60,0.35); border-radius: 4px; color: var(--A); text-decoration: none; letter-spacing: 0.04em; }
+  .genesis-link:hover { background: rgba(196,154,60,0.22); }
+
+  /* Tracks */
+  .tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .track { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .track-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 12px; }
+  .track-letter { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 3px; }
+  .track-A .track-letter { background: rgba(196,154,60,0.15); color: var(--A); }
+  .track-B .track-letter { background: rgba(74,143,168,0.15); color: var(--B); }
+  .track-header-text h3 { font-family: 'EB Garamond', serif; font-size: 1.1rem; font-weight: 500; color: var(--bright); line-height: 1.2; }
+  .track-header-text p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .track-steps { padding: 14px 0 6px; }
+  .track-step { display: grid; grid-template-columns: 52px 1fr; padding: 10px 22px 10px 0; position: relative; }
+  .track-step::before { content: ''; position: absolute; left: 26px; top: 0; bottom: 0; width: 1px; background: var(--border); z-index: 0; }
+  .track-step:first-child::before { top: 50%; }
+  .track-step:last-child::before { bottom: 50%; }
+  .step-num { display: flex; justify-content: center; align-items: flex-start; padding-top: 13px; z-index: 1; position: relative; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg); flex-shrink: 0; }
+  .track-A .step-dot { border-color: var(--A); }
+  .track-B .step-dot { border-color: var(--B); }
+  .step-content { padding: 8px 0 8px 4px; }
+  .step-role { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .step-title { font-family: 'EB Garamond', serif; font-size: 0.98rem; font-weight: 500; color: var(--bright); line-height: 1.2; margin-bottom: 3px; }
+  .step-file { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); }
+  .step-note { font-size: 12px; color: var(--text); margin-top: 4px; line-height: 1.45; }
+
+  /* Feedback note */
+  .feedback-note { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--B); border-radius: 6px; padding: 16px 20px; font-size: 13px; color: var(--text); line-height: 1.6; margin-top: 18px; }
+  .feedback-note strong { color: var(--bright); }
+
+  /* Parallel */
+  .parallel { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .parallel-header { padding: 16px 22px; border-bottom: 1px solid var(--border); }
+  .parallel-top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .parallel-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 9px; border-radius: 3px; background: rgba(90,158,120,0.12); color: var(--toy); white-space: nowrap; }
+  .parallel-header h3 { font-family: 'EB Garamond', serif; font-size: 1rem; font-weight: 500; color: var(--bright); }
+  .parallel-header p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .parallel-body { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); }
+  .parallel-item { background: var(--surface); padding: 14px 16px; }
+  .parallel-item-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--toy); margin-bottom: 4px; }
+  .parallel-item-title { font-family: 'EB Garamond', serif; font-size: 0.9rem; color: var(--bright); margin-bottom: 4px; line-height: 1.2; }
+  .parallel-item-note { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+
+  /* Companion */
+  .companion-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; display: grid; grid-template-columns: 4px 1fr; overflow: hidden; }
+  .companion-stripe { background: var(--num); }
+  .companion-body { padding: 16px 20px; }
+  .companion-file { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+  .companion-title { font-family: 'EB Garamond', serif; font-size: 1rem; font-weight: 500; color: var(--bright); margin-bottom: 8px; }
+  .companion-desc { font-size: 12.5px; color: var(--text); line-height: 1.55; }
+
+  /* Theorem table */
+  .legend { display: flex; gap: 20px; padding: 12px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
+  .badge { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; padding: 2px 6px; border-radius: 3px; font-weight: 500; }
+  .badge-E { background: rgba(90,158,120,0.15); color: var(--E); border: 1px solid rgba(90,158,120,0.25); }
+  .badge-K { background: rgba(107,143,181,0.15); color: var(--K); border: 1px solid rgba(107,143,181,0.25); }
+  .badge-O { background: rgba(196,154,60,0.15);  color: var(--O); border: 1px solid rgba(196,154,60,0.25); }
+  .theorem-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .theorem-table th { text-align: left; padding: 8px 14px; background: var(--surface2); color: var(--muted); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400; border-bottom: 1px solid var(--border); }
+  .theorem-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  .theorem-table tr:last-child td { border-bottom: none; }
+  .theorem-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted); width: 55px; }
+  .theorem-table td:nth-child(2) { font-family: 'EB Garamond', serif; font-size: 0.95rem; color: var(--bright); width: 200px; }
+  .theorem-table td:last-child { color: var(--text); font-size: 12px; }
+
+  /* Corrections */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: var(--surface2); padding: 1px 5px; border-radius: 3px; color: var(--text); }
+
+  @media (max-width: 900px) {
+    header, .container { padding-left: 24px; padding-right: 24px; }
+    .tracks { grid-template-columns: 1fr; }
+    .parallel-body { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Live issues */
+  .live-issues { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--O); border-radius: 6px; padding: 18px 22px; margin-top: 0; }
+  .live-issues h3 { font-family: 'EB Garamond', serif; font-size: 1rem; color: var(--O); margin-bottom: 12px; }
+  .live-issues ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .live-issues li { font-size: 12.5px; color: var(--text); padding-left: 18px; position: relative; line-height: 1.55; }
+  .live-issues li::before { content: '⚠'; position: absolute; left: 0; color: var(--O); font-size: 10px; top: 2px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Phantom Eigenmode</h1>
+  <p>Document index &nbsp;·&nbsp; April 2026 &nbsp;·&nbsp; Working documents — goal is truth, not credit</p>
+</header>
+
+<div class="container">
+
+  <!-- START HERE -->
+  <section>
+    <h2>Start here</h2>
+    <div class="genesis-entry">
+      <div class="genesis-stripe"></div>
+      <div class="genesis-body">
+        <div class="genesis-eyebrow">Entry point &nbsp;·&nbsp; Interactive &nbsp;·&nbsp; Three visualizations</div>
+        <h3>PhantomGenesis</h3>
+        <p>The observation that started everything: a rounded rectangle with three visible features and a gap in the corner — and the instinct that all three visible features were phantom, manufactured by the hole, not real. This document develops that instinct into three testable predictions, illustrates them with interactive visualizations (ocean wave drum, circular eigenmode decomposition, rectangular mode grid), derives the exact identities where they are exact, and ends with an honest theorem ledger that distinguishes proved identities from the open global T6 bound. Read this first. It establishes why you should care before explaining how anything works.</p>
+        <a class="genesis-link" href="genesis.html">Open PhantomGenesis →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TWO TRACKS -->
+  <section>
+    <h2>Two development paths</h2>
+    <div class="tracks">
+
+      <div class="track track-A">
+        <div class="track-header">
+          <span class="track-letter">A</span>
+          <div class="track-header-text">
+            <h3>Phenomenon and Control</h3>
+            <p>Observation → Mechanism → Formalization → Control → Generality</p>
+          </div>
+        </div>
+        <div class="track-steps">
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Observation</div>
+              <div class="step-title">PhantomGenesis</div>
+              <div class="step-file">genesis.html</div>
+              <div class="step-note">Establishes need. Something is wrong and surprising. Do not skip.</div>
+            </div>
+          </div>
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Mechanism</div>
+              <div class="step-title">The Gap as Scatterer</div>
+              <div class="step-file">scattering_analogy.ipynb</div>
+              <div class="step-note">Establishes intuition. Three layers of validity: what is exactly true (source on ∂G, coupling is a property of the hole, energy budget is exact), what is structural (same eigenbasis, different kernel), and what is physical analogy (finite bandwidth concentrates the kernel main lobe near the gap).</div>
+            </div>
+          </div>
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Formalization</div>
+              <div class="step-title">Phantom Eigenmode Fabrication</div>
+              <div class="step-file">hole_problem.ipynb</div>
+              <div class="step-note">Establishes the operator framework. Exact w<sub>G</sub>/s<sub>G,N</sub>/w<sub>G,N</sub> decomposition, core algebraic identities for the hard-mask model, five regimes, degenerate spectrum, recoverability and condition number, multipole expansion. Open problems and convention repairs noted in Part XIII.</div>
+            </div>
+          </div>
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Control</div>
+              <div class="step-title">Mitigation</div>
+              <div class="step-file">mitigation.ipynb</div>
+              <div class="step-note">Establishes control. Three regimes: known mask (invert A, regularize), design the measurement (minimize a<sub>n</sub>, aperture synthesis, transversality criterion), unknown mask (detection via K-amplitude and energy identity). Smooth tapering as faster decay vs sinc tails (exact rate depends on taper regularity class).</div>
+            </div>
+          </div>
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Generality</div>
+              <div class="step-title">Cross-Domain Survey</div>
+              <div class="step-file">five_domains.ipynb</div>
+              <div class="step-note">Establishes universality — and feeds back into mitigation (see below). CMB, geodesy, SAR, seismology, and structural monitoring independently developed closely related gap-coupling formalisms, with varying degrees of literal equivalence. §8.5 maps their solutions onto mitigation categories and identifies specific consequences for the home problem.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="track track-B">
+        <div class="track-header">
+          <span class="track-letter">B</span>
+          <div class="track-header-text">
+            <h3>Deeper Theory</h3>
+            <p>Abstract framework → Open theorem → Consequences</p>
+          </div>
+        </div>
+        <div class="track-steps">
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Abstract framework</div>
+              <div class="step-title">Compression–Commutator Geometry</div>
+              <div class="step-file">ccg.ipynb</div>
+              <div class="step-note">General separable Hilbert space, bounded M, defect Q = I − M, commutator routing law, compression-variance identity. Provides the abstract Hilbert-space backbone for the core algebra in Track A — but gives no reason to care until after you have seen Track A. Does not cover every concrete example, numerical check, or the open T6 bridge. Do not start here.</div>
+            </div>
+          </div>
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Open theorem</div>
+              <div class="step-title">T6: Boundary-Layer Localization</div>
+              <div class="step-file">boundary_layer.ipynb</div>
+              <div class="step-note">The formal bridge from the exact energy identity (phantom energy uniform in complete basis) to the near-gap localization seen in practice (main-lobe concentration near ∂G with global oscillatory sidelobes). T6a [K], T6b [E] exact, T6c with microlocal cutoff [K], full global bound [O]. Eight architectural errors recorded in Part 4.</div>
+            </div>
+          </div>
+
+          <div class="track-step">
+            <div class="step-num"><div class="step-dot"></div></div>
+            <div class="step-content">
+              <div class="step-role">Consequences</div>
+              <div class="step-title">T6 Applications</div>
+              <div class="step-file">boundary_layer_applications.ipynb</div>
+              <div class="step-note">Spectral edge detection: use the Gibbs profile Γ(Λt) to locate ∂G and estimate boundary trace f|<sub>∂G</sub>. T6 applied to rounded rectangles (the genesis geometry) — straight edges, quarter-circle arcs, curvature-jump correction at junctions is open.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="feedback-note">
+      <strong>Cross-domain ↔ mitigation is a two-way relationship.</strong>
+      The survey is not only evidence of generality — each community's solution is empirical data on what works.
+      §8.5 of <code>five_domains.ipynb</code> maps five communities' approaches onto three mitigation categories
+      (weaken coupling / redesign projection / multi-measurement synthesis) and identifies specific
+      consequences for the home problem: an optimal taper design criterion from CMB,
+      tr(C<sub>N</sub>) as a single-number gap diagnostic from geodesy,
+      principal-angle-based design criteria for multi-gap measurements from SAR,
+      and gap-boundary dithering as an unexploited strategy from seismology.
+    </div>
+  </section>
+
+  <!-- TOY MODELS -->
+  <section>
+    <h2>Parallel path — toy models</h2>
+    <div class="parallel">
+      <div class="parallel-header">
+        <div class="parallel-top">
+          <span class="parallel-label">Parallel — not downstream</span>
+          <h3>Intuition and verification in closed form</h3>
+        </div>
+        <p>Not consequences of the main theory — concrete settings where every formula can be inspected in closed form. Accessible at any point from Track A or B. The best place to check that the formulas produce correct numbers before trusting them. Each model adds one structural feature the previous one lacks.</p>
+      </div>
+      <div class="parallel-body">
+        <div class="parallel-item">
+          <div class="parallel-item-num">01 — Start here for degeneracy</div>
+          <div class="parallel-item-title">Quantum Graphs</div>
+          <div class="parallel-item-note">Star graph: β₁ = (2/3)ρ, β₂ = 0 exactly. Mask-adapted basis has physical meaning — "visits the gapped wire" vs "avoids it." Single-gap measurement is already injective: the forward operator $A = I - B_\lambda$ has eigenvalues $1 - (2/3)\rho$ and $1$, both strictly positive, so $A$ is injective on the antisymmetric eigenspace — even though $\beta_2 = 0$ means one direction of the eigenspace is completely invisible to the gap. A second gap improves conditioning; it does not restore lost injectivity.</div>
+        </div>
+        <div class="parallel-item">
+          <div class="parallel-item-num">02 — Kronecker structure</div>
+          <div class="parallel-item-title">Rectangular Membrane</div>
+          <div class="parallel-item-note">K = (4/LW) J<sup>x</sup> ⊗ J<sup>y</sup>. Every 2D formula reduces to products of closed-form 1D integrals. Structural zeros vs accidental zeros made explicit.</div>
+        </div>
+        <div class="parallel-item">
+          <div class="parallel-item-num">03 — Bessel functions</div>
+          <div class="parallel-item-title">Circular Disk</div>
+          <div class="parallel-item-note">Canonical degenerate domain. Closed-form β<sub>±</sub> for sector gaps. β<sub>±</sub> computed two independent ways (formula vs polar-grid quadrature, 1.6–2.8% agreement) — a genuine independent cross-check for the degenerate-spectrum identity.</div>
+        </div>
+        <div class="parallel-item">
+          <div class="parallel-item-num">04 — Inner wall effects</div>
+          <div class="parallel-item-title">Annular Membrane</div>
+          <div class="parallel-item-note">Disk with inner hole. Bessel + Neumann radial functions. Gap source reflects off inner wall — two-step scattering encoded in Bessel-Neumann combination. Richer radial coupling: inner-wall reflections produce mode interactions absent from solid-disk eigenfunctions.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUMERICAL COMPANION -->
+  <section>
+    <h2>Numerical verification</h2>
+    <div class="companion-card">
+      <div class="companion-stripe"></div>
+      <div class="companion-body">
+        <div class="companion-file">numerics.ipynb</div>
+        <div class="companion-title">Numerical Companion — Six Self-Consistency Experiments</div>
+        <div class="companion-desc">
+          Sections 1–5 use a rectangular membrane with exact Kronecker coupling K = (4/LW) J<sup>x</sup> ⊗ J<sup>y</sup>.
+          §6 is a disk degeneracy cross-check — a different domain, genuine independent verification rather than self-consistency.
+          §1: coupling convergence Σ|K|² → a(1−a). &nbsp;
+          §2: blind phantom detection by amplitude ranking and correlation threshold. &nbsp;
+          §3: six recovery methods (Naive / Direct / Tikhonov / TSVD / Neumann / L1) swept against condition number. &nbsp;
+          §4: multi-gap aperture synthesis — stacking improves σ<sub>min</sub>. &nbsp;
+          §5: false observable factory — false coherence, false damping, false interaction matrix verified. &nbsp;
+          §6: disk degeneracy β<sub>±</sub> — formula vs 200×400 polar-grid quadrature, 1.6–2.8% error consistent with Riemann sum on hard-edged mask. <strong>This is genuine cross-verification, not self-consistency.</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THEOREM LEDGER -->
+  <section>
+    <h2>Theorem ledger</h2>
+    <div class="legend">
+      <div class="legend-item"><span class="badge badge-E">[E]</span> Algebraic identity — established, verifiable by expansion</div>
+      <div class="legend-item"><span class="badge badge-K">[K]</span> Follows from known results in cited literature</div>
+      <div class="legend-item"><span class="badge badge-O">[O]</span> Open — ingredients identified, formal bridge missing</div>
+    </div>
+    <table class="theorem-table">
+      <thead>
+        <tr><th>Status</th><th>Name</th><th>Statement and location</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-E">[E]</span></td>
+          <td>T1 — Simple-spectrum energy identity</td>
+          <td>Σ<sub>m≠n</sub>|ĉ<sub>m</sub>|² = |c<sub>n</sub>|²·a<sub>n</sub>(1−a<sub>n</sub>). From M<sub>G</sub>² = M<sub>G</sub>. Bernoulli variance at gap fraction a<sub>n</sub>. &nbsp;→ hole_problem.ipynb §3.1, ccg.ipynb T1</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-E">[E]</span></td>
+          <td>T2 — Degenerate-spectrum energy identity</td>
+          <td>‖(I−P<sub>λ</sub>)M<sub>G</sub>f‖² = ⟨B<sub>λ</sub>(I−B<sub>λ</sub>)f,f⟩ = Σ|a<sub>j</sub>|²β<sub>j</sub>(1−β<sub>j</sub>). Exact for f ∈ E<sub>λ</sub>. Disk cross-check: 1.6–2.8%. &nbsp;→ hole_problem.ipynb §7</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-E">[E]</span></td>
+          <td>T3 — Decomposition theorem</td>
+          <td>w<sub>G,N</sub> = w<sub>G</sub> + s<sub>G,N</sub>. The main clarification over the original suite. w<sub>G</sub> is uniform and nondecaying; s<sub>G,N</sub> is Gibbs-localized near ∂G. &nbsp;→ hole_problem.ipynb §2.3</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-E">[E]</span></td>
+          <td>T4 — Boundary Wronskian identity</td>
+          <td>(λ<sub>m</sub>−λ<sub>n</sub>)K<sub>mn</sub> = ∫<sub>∂G</sub>[φ̄<sub>m</sub>∂<sub>ν</sub>φ<sub>n</sub> − φ<sub>n</sub>∂<sub>ν</sub>φ̄<sub>m</sub>] dS. Green's second identity on G. Requires smooth ∂G; rectangular gaps have corners requiring distributional treatment. &nbsp;→ hole_problem.ipynb §3.2</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-E">[E]</span></td>
+          <td>T5 — Masked dictionary Gram matrix</td>
+          <td>⟨M<sub>G</sub>φ<sub>n</sub>, M<sub>G</sub>φ<sub>m</sub>⟩ = A<sub>mn</sub>. From M<sub>G</sub>² = M<sub>G</sub>. Naive projection fits in wrong inner product. &nbsp;→ hole_problem.ipynb §8.1</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-E">[E]</span></td>
+          <td>T1′ — Star graph exact binary visibility</td>
+          <td>3-edge equilateral star, gap on e₁: β₁ = (2/3)ρ<sub>p</sub>, β₂ = 0 exactly. k-edge: β₁ = ((k−1)/k)ρ. &nbsp;→ quantum_graphs Part III</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-K">[K]</span></td>
+          <td>T7 — Multipole expansion</td>
+          <td>K<sub>mn</sub> = |G|φ<sub>n</sub>(x<sub>G</sub>)φ̄<sub>m</sub>(x<sub>G</sub>) + moment corrections. Taylor expansion of φ<sub>n</sub>(y)φ̄<sub>m</sub>(y) about gap centroid. &nbsp;→ hole_problem.ipynb §10</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-O">[O]</span></td>
+          <td>T6 — Boundary-layer localization</td>
+          <td>In controlled regimes (1D: proved; flat boundary: exact; curved with microlocal cutoff: [K]), s<sub>G,N</sub> concentrates near ∂G with width O(λ<sub>N</sub><sup>−1/2</sup>) and leading profile −f|<sub>∂G</sub>·Γ(Λt). Whether this extends to a global bound on general ∂G without cutoff is the open problem. T6a [K] outer, T6b [E] flat exact, T6c [K] curved with cutoff, full global [O]. &nbsp;→ boundary_layer.ipynb</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+
+  <!-- LIVE ISSUES -->
+  <section>
+    <h2>Known live issues</h2>
+    <div class="live-issues">
+      <h3>Currently open or uncertain — as of April 2026</h3>
+      <ul>
+        <li><strong>T6 full no-cutoff global bound is open [O].</strong> The Gibbs profile Γ(Λt) itself is proved: flat-boundary case T6b is [E] exact, curved-boundary case T6c with microlocal first-reflected cutoff χ₁ is [K]. The remaining open piece is the bound on the bridge term O(Λ⁻¹δ_eff⁻¹) without the χ₁ cutoff — i.e., controlling higher-bounce orbits. T6a outer decay is [K]. The profile model in boundary_layer.ipynb is the proved leading behavior, not a conjecture; only the global-bridge remainder is open.</li>
+        <li><strong>T9 transversality bound is open [O].</strong> The multi-gap aperture synthesis improvement is geometrically correct and numerically verified, but the explicit formula for σ<sub>min</sub>([A₁;…;A<sub>K</sub>]) as a function of the principal angle θ<sub>min</sub> between ambiguity subspaces is still missing.</li>
+        <li><strong>Scattering analogy depth is still being calibrated.</strong> What is exact (source on ∂G, coupling is a property of the hole, energy budget exact), what is structural (same eigenbasis pattern), and what is only qualitative analogy (diffraction language, cross-section picture) — the boundaries between these are clearer than in earlier versions but the scattering_analogy.ipynb document still needs one more pass to stop overstating the exactness of the connection.</li>
+        <li><strong>μ<sub>max</sub> bounds from gap geometry alone: open.</strong> Practical sensor placement needs upper bounds on the largest concentration eigenvalue without solving the full eigenvalue problem. No closed-form bound from gap geometry is currently available.</li>
+        <li><strong>No experimental validation yet.</strong> All results are analytic or computational. The forward model (gap → phantom spectrum) has not been confirmed against physical measurements on a real system.</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

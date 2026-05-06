@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01 Ocean Wave Drum</title>
+<style>
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f0;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666660;
+  --color-border-tertiary: rgba(0,0,0,0.15);
+  --border-radius-lg: 12px;
+  --border-radius-md: 8px;
+  --font-sans: system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1a1a1e;
+    --color-background-secondary: #2a2a2e;
+    --color-text-primary: #e8e8e0;
+    --color-text-secondary: #999990;
+    --color-border-tertiary: rgba(255,255,255,0.15);
+  }
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--color-border-tertiary);
+  border-radius: 2px;
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  cursor: pointer;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
+}
+</style>
+</head>
+<body>
+
+<h2 class="sr-only">Rounded rectangle drum head with illustratively separated gravity, wind, and capillary wave regimes at order-of-magnitude relative amplitudes</h2>
+<div style="padding: 1rem 0;">
+  <canvas id="drum" style="width: 100%; border-radius: var(--border-radius-lg);"></canvas>
+  <div style="display: flex; gap: 16px; margin-top: 1rem; flex-wrap: wrap;">
+    <label style="font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
+      <input type="checkbox" id="swell" checked> Gravity swell
+      <span style="display:inline-block;width:12px;height:3px;background:#1456a0;border-radius:2px;"></span>
+    </label>
+    <label style="font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
+      <input type="checkbox" id="wnd" checked> Wind seas
+      <span style="display:inline-block;width:12px;height:3px;background:#b87a1a;border-radius:2px;"></span>
+    </label>
+    <label style="font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
+      <input type="checkbox" id="cap" checked> Capillary
+      <span style="display:inline-block;width:12px;height:3px;background:#a02060;border-radius:2px;"></span>
+    </label>
+    <label style="font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
+      <input type="checkbox" id="disp" checked> Dispersion color
+    </label>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+    <label style="font-size: 13px; color: var(--color-text-secondary); min-width: 100px;">Swell dir</label>
+    <input type="range" id="sAng" min="0" max="360" value="10" step="1" style="flex:1;">
+    <span id="sAngV" style="font-size:13px;font-weight:500;min-width:32px;">10\u00b0</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+    <label style="font-size: 13px; color: var(--color-text-secondary); min-width: 100px;">Wind dir</label>
+    <input type="range" id="wAng" min="0" max="360" value="135" step="1" style="flex:1;">
+    <span id="wAngV" style="font-size:13px;font-weight:500;min-width:32px;">135\u00b0</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+    <label style="font-size: 13px; color: var(--color-text-secondary); min-width: 100px;">Wind strength</label>
+    <input type="range" id="wind" min="0" max="100" value="60" style="flex:1;">
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+    <label style="font-size: 13px; color: var(--color-text-secondary); min-width: 100px;">Depth</label>
+    <input type="range" id="depth" min="10" max="100" value="60" style="flex:1;">
+  </div>
+</div>
+<script>
+const canvas=document.getElementById('drum');
+const ctx=canvas.getContext('2d');
+const dpr=window.devicePixelRatio||1;
+const W=680,H=400;
+canvas.width=W*dpr;canvas.height=H*dpr;
+canvas.style.height=H+'px';ctx.scale(dpr,dpr);
+
+const pad=24,RR=28;
+const dL=pad,dT=pad,dW=W-2*pad,dH=H-2*pad;
+
+function rrPath(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+function sdfRR(px,py){
+  const dx=Math.abs(px-dL-dW/2)-dW/2+RR;
+  const dy=Math.abs(py-dT-dH/2)-dH/2+RR;
+  return Math.sqrt(Math.max(dx,0)**2+Math.max(dy,0)**2)-RR+Math.min(Math.max(dx,dy),0);
+}
+function edgeFade(px,py){const d=-sdfRR(px,py);return d<=0?0:Math.min(1,d/18);}
+function proj(x,y,ang){const r=ang*Math.PI/180;return x*Math.cos(r)+y*Math.sin(r);}
+
+const isDark=(()=>{const bg=getComputedStyle(document.documentElement).getPropertyValue('--color-background-primary').trim();return bg.startsWith('#')&&parseInt(bg.slice(1,3),16)<80;})();
+
+document.getElementById('sAng').oninput=function(){document.getElementById('sAngV').textContent=this.value+'\u00b0';};
+document.getElementById('wAng').oninput=function(){document.getElementById('wAngV').textContent=this.value+'\u00b0';};
+
+let t=0;const step=3;
+
+function draw(){
+  const showSwell=document.getElementById('swell').checked;
+  const showWind=document.getElementById('wnd').checked;
+  const showCap=document.getElementById('cap').checked;
+  const showDisp=document.getElementById('disp').checked;
+  const wind=document.getElementById('wind').value/100;
+  const dep=document.getElementById('depth').value/100;
+  const sAng=+document.getElementById('sAng').value;
+  const wAng=+document.getElementById('wAng').value;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  rrPath(dL,dT,dW,dH,RR);
+  ctx.clip();
+
+  for(let y=dT;y<dT+dH;y+=step){
+    for(let x=dL;x<dL+dW;x+=step){
+      const fade=edgeFade(x,y);
+      if(fade<=0)continue;
+
+      const lx=x-dL-dW/2,ly=y-dT-dH/2;
+      let zSwell=0,zWind=0,zCap=0;
+
+      // GRAVITY SWELL: long \u03bb (100-200px ~ 100-200m), large amplitude
+      // \u03c9\u00b2 = g\u00b7k (deep water dispersion)
+      if(showSwell){
+        const sp=proj(lx,ly,sAng),sp2=proj(lx,ly,sAng+18);
+        const k1=2*Math.PI/160,k2=2*Math.PI/220;
+        const om1=Math.sqrt(9.81*k1*dep)*0.5;
+        const om2=Math.sqrt(9.81*k2*dep)*0.4;
+        zSwell+=1.0*Math.sin(k1*sp-om1*t);
+        zSwell+=0.6*Math.sin(k2*sp2-om2*t*0.9+0.8);
+      }
+
+      // WIND SEAS: medium \u03bb (30-60px ~ 30-60m), gravity-restored but locally forced
+      // same dispersion \u03c9\u00b2 = g\u00b7k, but shorter \u03bb, so faster phase relative to wavelength
+      // amplitude ~0.3\u00d7 swell (real ratio varies, but order-of-magnitude smaller)
+      if(showWind){
+        const wp=proj(lx,ly,wAng),wp2=proj(lx,ly,wAng+35),wp3=proj(lx,ly,wAng-20);
+        const k1=2*Math.PI/45,k2=2*Math.PI/32,k3=2*Math.PI/55;
+        const om1=Math.sqrt(9.81*k1*dep)*0.6;
+        const om2=Math.sqrt(9.81*k2*dep)*0.6;
+        const om3=Math.sqrt(9.81*k3*dep)*0.55;
+        zWind+=0.30*wind*Math.sin(k1*wp-om1*t);
+        zWind+=0.20*wind*Math.sin(k2*wp2-om2*t*1.15);
+        zWind+=0.15*wind*Math.sin(k3*wp3-om3*t*0.85+1.3);
+      }
+
+      // CAPILLARY: very short \u03bb (6-12px ~ <2cm), surface-tension-restored
+      // \u03c9\u00b2 = \u03c3\u00b7k\u00b3/\u03c1 (inverted dispersion: shorter = faster)
+      // amplitude ~0.04\u00d7 swell (mm vs m in reality)
+      if(showCap){
+        const sigma=0.073,rho=1025;
+        const cp=proj(lx,ly,wAng+10),cp2=proj(lx,ly,wAng-15),cp3=proj(lx,ly,wAng+40);
+        const ck1=2*Math.PI/8,ck2=2*Math.PI/6,ck3=2*Math.PI/10;
+        const cow1=Math.sqrt(sigma*ck1*ck1*ck1/rho)*50;
+        const cow2=Math.sqrt(sigma*ck2*ck2*ck2/rho)*50;
+        const cow3=Math.sqrt(sigma*ck3*ck3*ck3/rho)*50;
+        zCap+=0.04*wind*Math.sin(ck1*cp-cow1*t);
+        zCap+=0.03*wind*Math.sin(ck2*cp2-cow2*t*1.1);
+        zCap+=0.025*wind*Math.sin(ck3*cp3-cow3*t*0.9+1.7);
+      }
+
+      const zTotal=(zSwell+zWind+zCap)*fade;
+
+      // COLOR MAPPING: each regime gets its own color channel
+      let r=145,g=200,b=232;
+
+      if(showDisp){
+        // Swell \u2192 deep blue shift (dominant surface shape)
+        const sn=zSwell*fade;
+        r+=sn*(-30);g+=sn*10;b+=sn*20;
+        if(sn<0){r+=sn*25;g+=sn*30;b+=sn*5;}
+
+        // Wind seas \u2192 amber/gold shift
+        const wn=zWind*fade;
+        r+=wn*80;g+=wn*40;b+=wn*(-30);
+        if(wn<0){r+=wn*10;g+=wn*20;b+=wn*5;}
+
+        // Capillary \u2192 magenta/pink (amplified for visibility since amplitude is tiny)
+        const cn=zCap*fade;
+        const capVis=25; // visual amplification factor for color only
+        r+=cn*capVis*40;g+=cn*capVis*(-10);b+=cn*capVis*(-5);
+      } else {
+        r+=zTotal*(-20);g+=zTotal*12;b+=zTotal*18;
+        if(zTotal<0){r+=zTotal*22;g+=zTotal*25;b+=zTotal*6;}
+      }
+
+      // specular on crests
+      if(zTotal>0.1){
+        const s=Math.min(1,(zTotal-0.1)*1.5);
+        r+=s*100;g+=s*100;b+=s*80;
+      }
+      // shadow in troughs
+      if(zTotal<-0.1){
+        const sh=Math.min(1,(-zTotal-0.1)*1.2);
+        r-=sh*65;g-=sh*60;b-=sh*35;
+      }
+
+      r=Math.max(0,Math.min(255,r));
+      g=Math.max(0,Math.min(255,g));
+      b=Math.max(0,Math.min(255,b));
+      ctx.fillStyle=`rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${fade*0.97})`;
+      ctx.fillRect(x,y,step,step);
+    }
+  }
+
+  // SWELL contour lines - wide spacing, heavy dark blue
+  if(showSwell){
+    const gr=sAng*Math.PI/180;
+    const px0=-Math.sin(gr),py0=Math.cos(gr);
+    ctx.strokeStyle='rgba(8,30,100,0.7)';
+    ctx.lineWidth=2;
+    for(let i=-5;i<6;i++){
+      ctx.beginPath();let s=false;
+      for(let u=-350;u<350;u+=3){
+        const px=dL+dW/2+Math.cos(gr)*u+px0*i*35;
+        const py=dT+dH/2+Math.sin(gr)*u+py0*i*35;
+        if(px<dL||px>dL+dW||py<dT||py>dT+dH)continue;
+        if(edgeFade(px,py)>0.15){
+          const w=10*Math.sin(2*Math.PI/160*u-t*0.25)+5*Math.sin(2*Math.PI/90*u-t*0.35+i*0.6);
+          if(!s){ctx.moveTo(px-px0*w,py-py0*w);s=true;}
+          else ctx.lineTo(px-px0*w,py-py0*w);
+        }
+      }
+      ctx.stroke();
+    }
+  }
+
+  // WIND SEA contour lines - medium spacing, amber/brown
+  if(showWind){
+    const wr=wAng*Math.PI/180;
+    const wpx=-Math.sin(wr),wpy=Math.cos(wr);
+    ctx.strokeStyle='rgba(140,80,10,0.55)';
+    ctx.lineWidth=1.2;
+    for(let i=-10;i<11;i++){
+      ctx.beginPath();let s=false;
+      for(let u=-350;u<350;u+=3){
+        const px=dL+dW/2+Math.cos(wr)*u+wpx*i*18;
+        const py=dT+dH/2+Math.sin(wr)*u+wpy*i*18;
+        if(px<dL||px>dL+dW||py<dT||py>dT+dH)continue;
+        if(edgeFade(px,py)>0.15){
+          const w=4*wind*Math.sin(2*Math.PI/45*u-t*0.8+i*0.5);
+          if(!s){ctx.moveTo(px-wpx*w,py-wpy*w);s=true;}
+          else ctx.lineTo(px-wpx*w,py-wpy*w);
+        }
+      }
+      ctx.stroke();
+    }
+  }
+
+  // CAPILLARY contour lines - tight spacing, dark magenta, thin
+  if(showCap){
+    const cr=(wAng+10)*Math.PI/180;
+    const cpx=-Math.sin(cr),cpy=Math.cos(cr);
+    ctx.strokeStyle='rgba(130,15,55,0.5)';
+    ctx.lineWidth=0.7;
+    for(let i=-20;i<21;i++){
+      ctx.beginPath();let s=false;
+      for(let u=-350;u<350;u+=3){
+        const px=dL+dW/2+Math.cos(cr)*u+cpx*i*8;
+        const py=dT+dH/2+Math.sin(cr)*u+cpy*i*8;
+        if(px<dL||px>dL+dW||py<dT||py>dT+dH)continue;
+        if(edgeFade(px,py)>0.15){
+          const w=1.5*wind*Math.sin(2*Math.PI/12*u-t*3.5+i*0.4);
+          if(!s){ctx.moveTo(px-cpx*w,py-cpy*w);s=true;}
+          else ctx.lineTo(px-cpx*w,py-cpy*w);
+        }
+      }
+      ctx.stroke();
+    }
+  }
+
+  // MEASUREMENT GAP: smaller floating rounded-rectangle, upper right
+  const gW=88,gH=58,gR=12;
+  const gX=dL+dW-gW-22, gY=dT+20;
+  rrPath(gX,gY,gW,gH,gR);
+  ctx.fillStyle='rgba(12,12,20,0.93)';
+  ctx.fill();
+  // Hatch lines clipped to rounded rect
+  ctx.save();
+  rrPath(gX,gY,gW,gH,gR);ctx.clip();
+  ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+  for(let i=-gH;i<gW+gH;i+=10){
+    ctx.beginPath();ctx.moveTo(gX+i,gY);ctx.lineTo(gX+i-gH,gY+gH);ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.restore();
+
+  // rim
+
+  // Gap border — full 4-sided dashed rounded rect + label
+  {
+    const gW2=88,gH2=58,gR2=12;
+    const gX2=dL+dW-gW2-22,gY2=dT+20;
+    rrPath(gX2,gY2,gW2,gH2,gR2);
+    ctx.strokeStyle='rgba(220,70,70,0.85)';
+    ctx.lineWidth=1.5;
+    ctx.setLineDash([5,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font='500 11px sans-serif';
+    ctx.fillStyle='rgba(220,70,70,0.78)';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('∂G',gX2+gW2/2,gY2+gH2/2);
+    ctx.textBaseline='alphabetic';
+  }
+  rrPath(dL,dT,dW,dH,RR);
+  ctx.strokeStyle=isDark?'rgba(180,178,169,0.5)':'rgba(40,40,38,0.5)';
+  ctx.lineWidth=2.5;ctx.stroke();
+  rrPath(dL+5,dT+5,dW-10,dH-10,RR-3);
+  ctx.strokeStyle=isDark?'rgba(180,178,169,0.15)':'rgba(40,40,38,0.1)';
+  ctx.lineWidth=0.5;ctx.stroke();
+
+  // direction arrows with labels
+  const acx=dL+dW/2,acy=dT+dH/2;
+  const arrLen=60;
+  function drawArrow(ang,col,lbl){
+    const ar=ang*Math.PI/180;
+    const ax=acx+Math.cos(ar)*arrLen,ay=acy+Math.sin(ar)*arrLen;
+    ctx.beginPath();ctx.moveTo(acx,acy);ctx.lineTo(ax,ay);
+    ctx.strokeStyle=col;ctx.lineWidth=3;ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ax-Math.cos(ar-0.4)*12,ay-Math.sin(ar-0.4)*12);
+    ctx.lineTo(ax,ay);
+    ctx.lineTo(ax-Math.cos(ar+0.4)*12,ay-Math.sin(ar+0.4)*12);
+    ctx.stroke();
+    const tx=acx+Math.cos(ar)*(arrLen+14),ty=acy+Math.sin(ar)*(arrLen+14);
+    ctx.font='500 11px sans-serif';ctx.fillStyle=col;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lbl,tx,ty);
+  }
+  if(showSwell)drawArrow(sAng,'rgba(8,30,120,0.85)','swell');
+  if(showWind)drawArrow(wAng,'rgba(160,90,10,0.85)','wind');
+  if(showCap)drawArrow(+document.getElementById('wAng').value+10,'rgba(150,20,60,0.7)','cap');
+
+  // rivets
+  [[dL+RR,dT+RR],[dL+dW-RR,dT+RR],[dL+RR,dT+dH-RR],[dL+dW-RR,dT+dH-RR]].forEach(([cx,cy])=>{
+    ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);
+    ctx.fillStyle=isDark?'rgba(180,178,169,0.35)':'rgba(40,40,38,0.2)';ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,1.5,0,Math.PI*2);
+    ctx.fillStyle=isDark?'rgba(180,178,169,0.6)':'rgba(40,40,38,0.4)';ctx.fill();
+  });
+
+  t+=0.08;
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhantomGenesis — Measurement Gaps as Fictitious Obstacles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+:root {
+  --bg:        #090910;
+  --bg2:       #111118;
+  --bg3:       #1a1a24;
+  --text:      #ccc8bb;
+  --text-dim:  #7a7870;
+  --head:      #eee8d8;
+  --accent-b:  #4882cc;
+  --accent-a:  #c07820;
+  --accent-m:  #aa3870;
+  --rule:      rgba(255,255,255,0.08);
+  --serif:     'Lora', Georgia, 'Times New Roman', serif;
+  --display:   'Playfair Display', 'Times New Roman', serif;
+  --mono:      'Fira Mono', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 18px; scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ── */
+.page { max-width: 740px; margin: 0 auto; padding: 0 2rem; }
+
+/* ── Masthead ── */
+.masthead {
+  padding: 5rem 0 4rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 4rem;
+}
+.masthead .eyebrow {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-b);
+  margin-bottom: 1.5rem;
+}
+.masthead h1 {
+  font-family: var(--display);
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  font-weight: 700;
+  color: var(--head);
+  line-height: 1.15;
+  margin-bottom: 1.2rem;
+}
+.masthead .subtitle {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--text-dim);
+  max-width: 560px;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+.masthead .meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+/* ── Sections ── */
+section {
+  margin-bottom: 5rem;
+}
+section + section {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.6rem;
+}
+.section-num {
+  color: var(--accent-b);
+}
+
+h2 {
+  font-family: var(--display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 1.4rem;
+}
+h3 {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--head);
+  margin-top: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+p { margin-bottom: 1.2rem; }
+p:last-child { margin-bottom: 0; }
+
+strong { color: var(--head); font-weight: 500; }
+
+em { font-style: italic; }
+
+/* ── Visualization frames ── */
+.viz-wrapper {
+  margin: 2.5rem -1rem;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #fff;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+}
+.viz-label {
+  background: var(--bg3);
+  padding: 0.5rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.viz-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.viz-wrapper iframe {
+  display: block;
+  width: 100%;
+  border: none;
+}
+
+/* ── Callout: three predictions ── */
+.predictions {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.pred {
+  padding: 1.1rem 1.4rem;
+  background: var(--bg2);
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.8rem;
+  align-items: start;
+}
+.pred-letter {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding-top: 0.15rem;
+}
+.pred-a .pred-letter { color: var(--accent-b); }
+.pred-b .pred-letter { color: var(--accent-a); }
+.pred-c .pred-letter { color: var(--accent-m); }
+.pred p { margin: 0; font-size: 0.95rem; }
+
+/* ── Math callout ── */
+.math-block {
+  margin: 1.8rem 0;
+  padding: 1.2rem 1.5rem;
+  background: var(--bg2);
+  border-left: 3px solid var(--accent-b);
+  border-radius: 0 6px 6px 0;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  overflow-x: auto;
+}
+.math-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-b);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Pull quote ── */
+.pull {
+  margin: 2.5rem 0;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.pull p {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--head);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Three kernels ── */
+.kernels {
+  margin: 2rem 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.kernel {
+  background: var(--bg2);
+  padding: 1.2rem;
+}
+.kernel-title {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.kernel-title.b { color: var(--accent-b); }
+.kernel-title.a { color: var(--accent-a); }
+.kernel-title.m { color: var(--accent-m); }
+.kernel-eq {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--head);
+  margin-bottom: 0.5rem;
+}
+.kernel p { font-size: 0.85rem; color: var(--text-dim); margin: 0; }
+
+/* ── Summary table ── */
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.85rem;
+}
+.result-table th {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 0.6rem 1rem 0.6rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.result-table td {
+  padding: 0.75rem 1rem 0.75rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.result-table td:first-child { color: var(--head); }
+.result-table td:last-child {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+}
+.tag-exact { background: rgba(72,130,204,0.2); color: #7aacdd; }
+.tag-qual  { background: rgba(192,120,32,0.2); color: #d49a50; }
+.tag-k     { background: rgba(50,180,90,0.2);  color: #6ac07a; }
+.tag-open  { background: rgba(180,50,50,0.2);  color: #dd8080; }
+
+/* ── Footer ── */
+footer {
+  margin-top: 5rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+  .kernels { grid-template-columns: 1fr; }
+  .viz-wrapper { margin: 2rem -0.5rem; }
+  footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- ─── Masthead ─── -->
+<header class="masthead">
+  <div class="eyebrow">Working paper &nbsp;·&nbsp; April 2026</div>
+  <h1>Phantom&shy;Genesis</h1>
+  <p class="subtitle">How measurement gaps manufacture the appearance of structure in spectral data — and why the phantoms are properties of the hole, not the signal.</p>
+  <div class="meta">Three interactive visualizations &nbsp;·&nbsp; Six theorems &nbsp;·&nbsp; One open problem</div>
+</header>
+
+
+<!-- ─── §1 The Instinct ─── -->
+<section id="instinct">
+  <div class="section-label"><span class="section-num">01 &nbsp;/</span>&nbsp; The instinct</div>
+  <h2>Three dots that should not exist</h2>
+
+  <p>The paper did not begin with operator theory. It began with a picture: a rounded rectangle with three features visible and a measurement gap in the upper right corner. The features were arranged in what looked like a partial cloverleaf pattern — three lobes of what might have been a four-lobed mode, with the fourth lobe missing in the region where no data was available.</p>
+
+  <p>The natural interpretation was that the three visible features were real — genuine physical phenomena — and that a fourth might or might not exist under the gap. This is how measurement gaps are typically handled: the gap is a region of ignorance, and the observable data outside it is trusted.</p>
+
+  <div class="pull">
+    <p>The instinct that launched this work was the opposite: the three visible features were not real. They were artifacts created by the gap itself.</p>
+  </div>
+
+  <p>The hole in the measurement was not merely a region of missing information — it was <em>actively creating</em> the appearance of structure in the data that did exist. All three dots were phantoms, manufactured by the geometry and placement of the measurement gap.</p>
+
+  <p>Two specific aspects of this instinct were important. First, it was the hole that caused the phantoms, not whatever physical signal might exist beneath it. The gap's geometry, not the hidden field, was the source. Second, the phantom structure was not uniformly distributed. The three visible lobes were the ones <em>nearest</em> to the gap. The fourth — diametrically opposite — was missing. The phantom effect was distance-dependent: strongest near the hole, decaying away from it.</p>
+
+  <p>This was a physical instinct, not a mathematical derivation. The work that followed was an attempt to determine whether that instinct was correct and, if so, what the precise mechanism was.</p>
+</section>
+
+
+<!-- ─── §2 Physical Setting ─── -->
+<section id="setting">
+  <div class="section-label"><span class="section-num">02 &nbsp;/</span>&nbsp; Physical setting</div>
+  <h2>The wave field and the gap</h2>
+
+  <p>The motivating scenario: a bounded domain supporting superimposed wave regimes at qualitatively representative relative amplitudes (calibrated to order of magnitude, not to a specific ocean regime), with a rounded rectangular measurement gap cut out of the corner. Three regimes with distinct dispersion relations coexist — gravity swell with \(\omega^2 = gk\) at long wavelengths, wind-driven seas at intermediate scales, and capillary waves with \(\omega^2 = \sigma k^3/\rho\) at very short wavelengths where surface tension dominates and shorter waves propagate faster.</p>
+
+  <p>Interact with the visualization: adjust wave directions and strengths, toggle wave regimes on and off. The dark rectangle in the upper right is the measurement gap — the region \(G\) where no data is available. Its boundary \(\partial G\) is the source of all phantom content. The wave field runs underneath it, unaffected; only the analysis pipeline is blind to that region.</p>
+
+  <div class="viz-wrapper">
+    <div class="viz-label">
+      <span class="viz-dot" style="background:#4882cc;"></span>
+      Ocean wave drum &nbsp;·&nbsp; rounded rectangular domain with measurement gap
+    </div>
+    <iframe src="viz/ocean_wave_drum.html" height="640" scrolling="no" title="Ocean wave drum visualization"></iframe>
+  </div>
+
+  <p style="margin-top:1.5rem;">The gap boundary \(\partial G\) is the key geometric object. The field inside the gap is unknown; the analysis pipeline treats it as zero. That enforced zeroing — a fictitious Dirichlet condition the physics never imposed — is the source of every phantom feature.</p>
+</section>
+
+
+<!-- ─── §3 Analogy ─── -->
+<section id="analogy">
+  <div class="section-label"><span class="section-num">03 &nbsp;/</span>&nbsp; Physical analogy</div>
+  <h2>The gap as a fictitious obstacle</h2>
+
+  <p>The underlying physical intuition: a measurement gap acts like a fictitious obstacle in a wave field. When a physical wave encounters a real obstacle, the obstacle boundary enforces a condition — the wave must satisfy Dirichlet or Neumann at the boundary. The incident wave cannot satisfy this condition alone, so a <em>scattered field</em> is generated. That scattered field radiates outward from the obstacle boundary, decays with distance at a rate set by the Green's function, and has a spatial structure determined entirely by the obstacle geometry and the incident field's local behavior near the boundary.</p>
+
+  <p>A measurement gap does something analogous, but in the <em>analysis domain</em> rather than the physical domain. The true signal passes through the gap without knowing the gap exists — the physics is unaffected. But the analysis pipeline sets the field to zero inside the gap, imposing a fictitious Dirichlet condition that the physics never imposed. The spectral decomposition of the measured field must account for this discrepancy, and it does so by introducing phantom spectral components — the analysis-domain equivalent of a scattered field.</p>
+
+  <p><strong>The phantom field is structurally analogous to a scattered response from the fictitious obstacle.</strong> It is sourced on the gap boundary \(\partial G\), with strongest amplitude near the gap and global oscillatory sidelobes persisting at distance — not a monotone decay. Its spatial structure is determined by the gap geometry and the domain's eigenbasis.</p>
+
+  <p>This analogy predicted three things before any mathematics was written:</p>
+
+  <div class="predictions">
+    <div class="pred pred-a">
+      <span class="pred-letter">(a)</span>
+      <p>The phantom features should be properties of the hole, not the signal. Different signals through the same hole should produce phantom features with the same spatial structure — same coupling matrix \(K\), same gap fingerprint — differing only in amplitude.</p>
+    </div>
+    <div class="pred pred-b">
+      <span class="pred-letter">(b)</span>
+      <p>The phantom features should be strongest near the gap, because the scattered field from the fictitious obstacle is mediated by the reproducing kernel of the finite basis — a kernel whose main lobe is concentrated near the source point with width scaling as \(1/\sqrt{\lambda_N}\). <em>(Note: the kernel has global sidelobes, not finite spatial range; see §6 for the precise finite-bandwidth statement.)</em></p>
+    </div>
+    <div class="pred pred-c">
+      <span class="pred-letter">(c)</span>
+      <p>The phantom features should have spatial structure determined by the gap geometry — its size, shape, and placement — rather than by the true signal's spectral content.</p>
+    </div>
+  </div>
+
+  <p style="margin-top:1.5rem;">Predictions (a) and (c) are confirmed exactly by the mathematics that follows: (a) via the coupling matrix identity $K_{mn}=\int_G\varphi_n\bar\varphi_m$ being a property of the gap alone, and (c) via the phantom&#39;s spatial structure following from the gap-dependent coupling. Prediction (b) — that phantom features should be strongest near the gap — is derived in the finite-bandwidth regime via reproducing-kernel concentration and proved in 1D (T6 on the path graph), proved with a microlocal cutoff on curved boundaries (T6c), but the full global bound on general $\partial G$ without cutoff remains open (T6, [O] in the ledger). The near-gap story is strongly motivated, qualitatively explained, and numerically illustrated; a full global theorem is still missing.</p>
+</section>
+
+
+<!-- ─── §4 Cymatics ─── -->
+<section id="cymatics">
+  <div class="section-label"><span class="section-num">04 &nbsp;/</span>&nbsp; From waves to eigenmodes</div>
+  <h2>The cymatics connection</h2>
+
+  <p>The investigation shifted to eigenmode analysis on bounded domains, motivated by Chladni plate cymatics — high-order Bessel eigenmodes on a circular plate showing discrete rotational symmetry. The question: what would a missing measurement patch do to such a pattern?</p>
+
+  <p>The cymatics example made the eigenmode structure explicit. The true pattern had discrete rotational symmetry, and the gap broke that symmetry. Projecting the gapped field onto \(\cos(n\theta)\) for each azimuthal order \(n\) revealed that the gap created nonzero coefficients at every \(n \neq n_0\), even though the true signal had energy only at \(n_0\). These were not noise — they were coherent, deterministic, and spatially structured as valid eigenfunctions. They were phantoms.</p>
+
+  <p>Crucially: when the phantom modes were reconstructed spatially, they did not produce random structure. They produced a pattern that <em>looked like the true mode</em> — same symmetry class, same spatial wavelength, same lobe structure — but manufactured entirely by the gap.</p>
+
+  <div class="viz-wrapper">
+    <div class="viz-label">
+      <span class="viz-dot" style="background:#aa3870;"></span>
+      Circular phantom decomposition &nbsp;·&nbsp; Bessel eigenmodes, azimuthal mode spectrum
+    </div>
+    <iframe src="viz/circular_decomposition.html" height="1225" scrolling="no" title="Circular phantom decomposition"></iframe>
+  </div>
+
+  <p style="margin-top:1.5rem;">Move the blind patch around the circular plate. Watch the mode decomposition bar chart: the true mode (highlighted) is flanked by phantom energy at every other azimuthal order. The phantom field panel isolates the fabricated content. The bottom row shows what an observer would actually conclude — contaminated reconstruction indistinguishable from a multi-mode superposition, even though the true field was a single clean mode.</p>
+</section>
+
+
+<!-- ─── §5 Mathematics ─── -->
+<section id="mathematics">
+  <div class="section-label"><span class="section-num">05 &nbsp;/</span>&nbsp; The mathematics</div>
+  <h2>Exact identities</h2>
+
+  <p>For a single true mode \(\varphi_{n_0}\) with coefficient \(c_{n_0}\), let \(a_n = \int_G |\varphi_{n_0}|^2\) be the fraction of the mode's \(L^2\)-mass captured by the gap. The exact phantom field outside \(G\) is:</p>
+
+  <div class="math-block">
+    <div class="math-label">Exact spatial identity</div>
+    \( f_{\mathrm{phantom}}(x) = a_n \cdot c_{n_0} \cdot \varphi_{n_0}(x) \quad \text{for } x \notin G \)
+  </div>
+
+  <p>This follows from completeness and the idempotency of the mask operator \(M = I - \chi_G\). Every lobe, same amplitude, same shape.</p>
+  <p>A precision note: the raw spatial measurements outside \(G\) are the true field — \(M_G f(x) = f(x)\) for \(x \notin G\), so the data itself is not phantom. What is phantom is the spectral attribution: the modal coefficients \(\hat{c}_m\) for \(m \neq n_0\) are entirely artefactual. The spatial data is real; the modal explanation that the spectral decomposition constructs from it is fabricated by the gap geometry. The instinct that the visible features are phantom is correct at the level of their spectral interpretation — they are being attributed to modes where the true field has zero energy.</p>
+
+  <p>The total phantom energy satisfies an exact identity:</p>
+
+  <div class="math-block">
+    <div class="math-label">Energy identity</div>
+    \( \sum_{m \neq n_0} |\hat{c}_m|^2 = |c_{n_0}|^2\, a_n(1 - a_n) \)
+  </div>
+
+  <p>For degenerate spectrum with eigenvalue multiplicity, the identity generalizes to \( \|(I - P_\lambda)Mf\|^2 = \langle B_\lambda(I - B_\lambda)f, f\rangle \), where \(B_\lambda = P_\lambda \chi_G P_\lambda\) restricted to the eigenspace.</p>
+
+  <div class="viz-wrapper">
+    <div class="viz-label">
+      <span class="viz-dot" style="background:#c07820;"></span>
+      Phantom mode decomposition &nbsp;·&nbsp; rectangular plate, drag the blind patch
+    </div>
+    <iframe src="viz/mode_decomposition.html" height="980" scrolling="no" title="Phantom mode decomposition"></iframe>
+  </div>
+
+  <p style="margin-top:1.5rem;">The mode energy grid (center left) shows blue circles for the true decomposition — energy concentrated at the single mode \((m_0, n_0)\). The orange/red circles show the masked decomposition: the true mode shifts amplitude, and every other mode acquires phantom energy (red stars). The ghost field panel isolates all fabricated content. Move the patch to a node of the true mode: phantom energy drops toward zero, because \(a_n \to 0\).</p>
+
+  <h3>Three mediating kernels</h3>
+
+  <div class="kernels">
+    <div class="kernel">
+      <div class="kernel-title b">Coupling kernel</div>
+      <div class="kernel-eq">\(K_{mn} = \int_G \varphi_n \bar\varphi_m\)</div>
+      <p>The gap's fingerprint in coefficient space. A property of the hole geometry alone — independent of the signal.</p>
+    </div>
+    <div class="kernel">
+      <div class="kernel-title a">Reproducing kernel</div>
+      <div class="kernel-eq">\(K_N(x, x_G)\)</div>
+      <p>The response kernel. Peaks near the gap centroid \(x_G\), with main-lobe concentration and global oscillatory sidelobes. Structurally analogous to a Green-function response kernel, but not a physical Green's function: the spectral weighting is flat (equal weight per retained mode) rather than \(1/\lambda_n\).</p>
+    </div>
+    <div class="kernel">
+      <div class="kernel-title m">Concentration operator</div>
+      <div class="kernel-eq">\(C_N = P_N \chi_G P_N\)</div>
+      <p>The stability kernel. Its spectrum controls whether phantom suppression is feasible and how ill-conditioned the recovery problem is.</p>
+    </div>
+  </div>
+
+  <p>The commutator identity \([-\Delta, M]u = -2\nabla M \cdot \nabla u - (\Delta M)u\) is supported on \(\partial G\). This is not merely a heuristic about edge effects: it has a direct physical reading. <strong>The gap boundary is a source term. The commutator is the source. The phantom field is the response.</strong></p>
+</section>
+
+
+<!-- ─── §6 Tension ─── -->
+<section id="tension">
+  <div class="section-label"><span class="section-num">06 &nbsp;/</span>&nbsp; The tension</div>
+  <h2>Uniform phantoms versus distance decay</h2>
+
+  <p>The exact identity creates a tension with the original observation. The identity says the phantom field outside \(G\) is spatially <em>uniform</em> — every lobe carries the same multiplicative attenuation factor $a_n$ on the true mode, regardless of distance from the gap. But the observation was that the far lobe was missing while the three near lobes were visible.</p>
+
+  <p>The resolution lies in the distinction between the complete-basis limit and the finite-bandwidth regime. The exact identity holds when summing <em>all</em> phantom mode contributions. In practice, spectral analysis retains a finite number of modes \(N\), and the finite-bandwidth phantom field is:</p>
+
+  <div class="math-block">
+    <div class="math-label">Finite-bandwidth phantom (small-gap regime)</div>
+    \( f_{\mathrm{phantom}}^{(N)}(x) \approx -c_{n_0}|G|\varphi_{n_0}(x_G) \cdot \bigl[K_N(x, x_G) - \varphi_{n_0}(x_G)\varphi_{n_0}(x)\bigr] \)
+  </div>
+
+  <p>The reproducing kernel \(K_N(x, x_G)\) concentrates its main lobe at the gap centroid with width \(\sim 1/\sqrt{\lambda_N}\), while global sidelobes persist across the domain. Near the gap, the phantom field is strong; far from the gap, the main-lobe contribution falls below detection threshold, though sidelobes remain. As \(N \to \infty\), the reproducing kernel sharpens toward \(\delta(x - x_G)\) (a Dirichlet-kernel concentration, not a broadening), and via Parseval completeness the exact spatially-uniform identity is recovered in the limit.</p>
+
+  <p>The original observation — three near lobes visible, far lobe missing — is therefore a <strong>finite-bandwidth effect</strong>. The total phantom energy converges to \(a_n(1-a_n)\) as \(N \to \infty\); for finite \(N\) it is a partial sum approaching that value, with spatial distribution controlled by the main-lobe width of \(K_N\).</p>
+</section>
+
+
+<!-- ─── §7 Status ─── -->
+<section id="status">
+  <div class="section-label"><span class="section-num">07 &nbsp;/</span>&nbsp; Theorem ledger</div>
+  <h2>What is proved, and what is not</h2>
+
+  <p>The paper establishes the exact identities and the coupling-matrix structure rigorously. The distance-decay result — the original motivating observation — is qualitatively explained by the finite-bandwidth reproducing kernel argument, but not yet formally derived with a decay rate. That bridge is addressed by T6:</p>
+
+  <div class="math-block">
+    <div class="math-label">T6 — Boundary-layer localization (Gibbs profile)</div>
+    \( s_{G,N}(z,t) = -f\!\big|_{\partial G}(z) \cdot \Gamma(\Lambda t) + O(\Lambda^{-1}), \qquad \Gamma(u) = \tfrac{1}{2} - \tfrac{\mathrm{Si}(u)}{\pi} \)
+  </div>
+
+  <p>where \(\Lambda = \sqrt{\lambda_N}\) is the spectral bandwidth and \(t\) is the signed distance from \(\partial G\). T6 is the quantitative version of the finite-bandwidth decay story. The leading profile \(\Gamma(\Lambda t)\) and curvature/gradient corrections are proved [K]. The \(O(\Lambda^{-1})\) error includes a bridge term \(O(\Lambda^{-1}\delta_{\mathrm{eff}}^{-1})\) that is proved only for the microlocal first-reflected branch; the full global bridge remains open [O] and does not affect the leading profile.</p>
+
+  <table class="result-table">
+    <thead>
+      <tr>
+        <th style="width:42%">Result</th>
+        <th style="width:38%">Statement</th>
+        <th style="width:20%">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Phantom energy identity</td>
+        <td>\(\sum_{m\neq n_0}|\hat{c}_m|^2 = a_n(1{-}a_n)\)</td>
+        <td><span class="tag tag-exact">Exact</span></td>
+      </tr>
+      <tr>
+        <td>Degenerate identity</td>
+        <td>\(\|(I{-}P_\lambda)Mf\|^2 = \langle B_\lambda(I{-}B_\lambda)f, f\rangle\)</td>
+        <td><span class="tag tag-exact">Exact</span></td>
+      </tr>
+      <tr>
+        <td>Exact spatial identity</td>
+        <td>\(f_{\rm phantom}(x) = a_n c_{n_0}\varphi_{n_0}(x)\) for \(x\notin G\)</td>
+        <td><span class="tag tag-exact">Exact</span></td>
+      </tr>
+      <tr>
+        <td>Coupling matrix</td>
+        <td>\(K_{mn} = \int_G \varphi_n\bar\varphi_m\) — hole geometry only</td>
+        <td><span class="tag tag-exact">Exact</span></td>
+      </tr>
+      <tr>
+        <td>Distance decay (finite-N)</td>
+        <td>Reproducing kernel localization near \(x_G\)</td>
+        <td><span class="tag tag-qual">Qualitative</span></td>
+      </tr>
+      <tr>
+        <td>T6 Gibbs bound</td>
+        <td>\(s_{G,N} = -f|_{\partial G}\cdot\Gamma(\Lambda t) + O(\Lambda^{-1})\)</td>
+        <td><span class="tag tag-k">[E] profile · [K] error · [O] global</span></td>
+      </tr>
+      <tr>
+        <td>Full spatial decay theorem</td>
+        <td>Operator-norm bound on finite-N phantom pattern</td>
+        <td><span class="tag tag-open">Open</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pull" style="margin-top:2.5rem;">
+    <p>The phantoms are the hole's fingerprint, not the signal's. The coupling matrix \(K_{mn}\) depends on \(\chi_G\) — the mask — not on the field. Different signals through the same hole produce the same coupling structure. The hole stamps its spectral fingerprint onto whatever data passes through it.</p>
+  </div>
+</section>
+
+
+<footer>
+  <span>PhantomGenesis &nbsp;·&nbsp; Working notes, April 2026</span>
+  <span>T6 development record v15</span>
+</footer>
+
+</div><!-- .page -->
+
+
+<script>
+// Auto-size iframes to their content after load
+// Works because all files are same-origin (same folder)
+document.querySelectorAll('iframe').forEach(function(iframe) {
+  iframe.addEventListener('load', function() {
+    try {
+      var doc = iframe.contentDocument || iframe.contentWindow.document;
+      var h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+      if (h > 100) iframe.style.height = h + 'px';
+    } catch(e) { /* cross-origin: keep hardcoded height */ }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Circular Phantom Mode Decomposition</title>
+<style>
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f0;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666660;
+  --color-border-tertiary: rgba(0,0,0,0.15);
+  --border-radius-lg: 12px;
+  --border-radius-md: 8px;
+  --font-sans: system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1a1a1e;
+    --color-background-secondary: #2a2a2e;
+    --color-text-primary: #e8e8e0;
+    --color-text-secondary: #999990;
+    --color-border-tertiary: rgba(255,255,255,0.15);
+  }
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--color-border-tertiary);
+  border-radius: 2px;
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  cursor: pointer;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
+}
+</style>
+</head>
+<body>
+
+<h2 class="sr-only">Phantom artifact analysis with isolated ghost mode contributions showing non-uniform spatial distribution</h2>
+<div style="padding: 0.5rem 0;">
+  <canvas id="cv" style="width: 100%; border-radius: var(--border-radius-lg);"></canvas>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-top: 6px;">
+    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:12px;color:var(--color-text-secondary);min-width:70px;">Azimuthal n</label><input type="range" id="nAz" min="1" max="8" value="4" step="1" style="flex:1;"><span id="nAzV" style="font-size:12px;font-weight:500;min-width:16px;">4</span></div>
+    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:12px;color:var(--color-text-secondary);min-width:70px;">Radial m</label><input type="range" id="nRad" min="1" max="6" value="3" step="1" style="flex:1;"><span id="nRadV" style="font-size:12px;font-weight:500;min-width:16px;">3</span></div>
+    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:12px;color:var(--color-text-secondary);min-width:70px;">Patch size</label><input type="range" id="pSize" min="5" max="40" value="18" step="1" style="flex:1;"><span id="pSizeV" style="font-size:12px;font-weight:500;min-width:16px;">18</span></div>
+    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:12px;color:var(--color-text-secondary);min-width:70px;">Patch angle</label><input type="range" id="pAng" min="0" max="360" value="315" step="1" style="flex:1;"><span id="pAngV" style="font-size:12px;font-weight:500;min-width:28px;">315\u00b0</span></div>
+    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:12px;color:var(--color-text-secondary);min-width:70px;">Patch radius</label><input type="range" id="pRad" min="20" max="90" value="65" step="1" style="flex:1;"><span id="pRadV" style="font-size:12px;font-weight:500;min-width:20px;">65</span></div>
+    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:12px;color:var(--color-text-secondary);min-width:70px;">Overtone</label><input type="range" id="mix" min="0" max="100" value="0" step="1" style="flex:1;"><span id="mixV" style="font-size:12px;font-weight:500;min-width:20px;">0</span></div>
+  </div>
+</div>
+<script>
+const N=128,NN=N*N;
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+const dpr=window.devicePixelRatio||1;
+const CW=680;
+const halfW=(CW-16-8)/2,panH=halfW;
+const LM=8,vgap=6,labH=15;
+const slot=panH+vgap+labH;
+const r1y=labH+2,r2y=r1y+slot,r3y=r2y+slot;
+const CH=r3y+panH+6;
+cv.width=CW*dpr;cv.height=CH*dpr;cv.style.height=CH+'px';ctx.scale(dpr,dpr);
+const RR=6;
+const isDark=(()=>{const bg=getComputedStyle(document.documentElement).getPropertyValue('--color-background-primary').trim();return bg.startsWith('#')&&parseInt(bg.slice(1,3),16)<80;})();
+const txtCol=isDark?'rgba(220,218,210,0.85)':'rgba(40,40,38,0.8)';
+const rimCol=isDark?'rgba(180,178,169,0.35)':'rgba(40,40,38,0.3)';
+const dimCol=isDark?'rgba(180,178,169,0.5)':'rgba(60,60,58,0.5)';
+
+['nAz','nRad','pSize','pRad','mix'].forEach(id=>{document.getElementById(id).oninput=function(){document.getElementById(id+'V').textContent=this.value;};});
+document.getElementById('pAng').oninput=function(){document.getElementById('pAngV').textContent=this.value+'\u00b0';};
+
+function besselJ(n,x){if(Math.abs(x)<1e-10)return n===0?1:0;let s=0,tm=1;for(let k=0;k<25;k++){if(k>0)tm*=-x*x/(4*k*(k+n));s+=tm;}return s*Math.pow(x/2,n)/gm(n+1);}
+function gm(n){let r=1;for(let i=1;i<n;i++)r*=i;return r;}
+const zeros=[[2.405,5.520,8.654,11.792,14.931,18.071],[3.832,7.016,10.174,13.324,16.471,19.616],[5.136,8.417,11.620,14.796,17.960,21.117],[6.380,9.761,13.015,16.224,19.409,22.583],[7.588,11.065,14.373,17.616,20.827,24.019],[8.771,12.339,15.700,18.980,22.218,25.431],[9.936,13.589,17.004,20.321,23.586,26.820],[11.086,14.821,18.288,21.642,24.935,28.191],[12.225,16.038,19.555,22.945,26.267,29.546]];
+function gz(n,m){return zeros[Math.min(n,8)][Math.min(m-1,5)];}
+
+const plate=new Float64Array(NN),masked=new Float64Array(NN),mask=new Float64Array(NN);
+const ghostField=new Float64Array(NN);
+
+function pXY(){const a=+document.getElementById('pAng').value*Math.PI/180,r=+document.getElementById('pRad').value/100;return[.5+r*Math.cos(a)*.5,.5+r*Math.sin(a)*.5];}
+
+function cymCol(t){t=Math.max(0,Math.min(1,t));const r=Math.abs(t*2-1);if(t<.5)return[Math.round(10+r*60),Math.round(5+r*20),Math.round(80+r*175)];return[Math.round(70+r*185),Math.round(25+r*130),Math.round(255-r*50)];}
+
+function rrC(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();}
+
+function drawCirc(px,py,w,h,data,cmap,lab,showP,rlab){
+  ctx.save();rrC(px,py,w,h,RR);ctx.clip();
+  ctx.fillStyle='rgb(10,8,18)';ctx.fillRect(px,py,w,h);
+  let mn=1e30,mx=-1e30;
+  for(let i=0;i<NN;i++){if(data[i]<mn)mn=data[i];if(data[i]>mx)mx=data[i];}
+  const rg=mx-mn||1,cw=w/N,ch=h/N;
+  for(let iy=0;iy<N;iy++)for(let ix=0;ix<N;ix++){
+    const xn=(ix-N/2)/(N/2),yn=(iy-N/2)/(N/2),r=Math.sqrt(xn*xn+yn*yn);
+    if(r>1)continue;
+    const n=(data[iy*N+ix]-mn)/rg;const c=cmap(Math.max(0,Math.min(1,n)));
+    let a=1;if(r>.93)a=Math.max(0,(1-r)*14);
+    ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+    ctx.fillRect(px+ix*cw,py+iy*ch,Math.ceil(cw),Math.ceil(ch));
+  }
+  if(showP){const ps=+document.getElementById('pSize').value/100;const[pcx,pcy]=pXY();ctx.strokeStyle='rgba(255,70,70,0.9)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.arc(px+pcx*w,py+pcy*h,ps*w,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
+  ctx.strokeStyle='rgba(140,130,180,0.25)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(px+w/2,py+h/2,w/2*.98,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+  rrC(px,py,w,h,RR);ctx.strokeStyle=rimCol;ctx.lineWidth=1;ctx.stroke();
+  ctx.font='500 12px sans-serif';ctx.fillStyle=txtCol;ctx.textAlign='left';ctx.fillText(lab,px+4,py-4);
+  if(rlab){ctx.textAlign='right';ctx.font='400 11px sans-serif';ctx.fillStyle=dimCol;ctx.fillText(rlab,px+w-4,py-4);}
+}
+
+function samplePlate(){
+  const nA=+document.getElementById('nAz').value,nR=+document.getElementById('nRad').value,mix=document.getElementById('mix').value/100;
+  const z1=gz(nA,nR),z2=gz(nA,Math.min(nR+1,6));
+  for(let iy=0;iy<N;iy++)for(let ix=0;ix<N;ix++){
+    const x=(ix-N/2)/(N/2),y=(iy-N/2)/(N/2),r=Math.sqrt(x*x+y*y),th=Math.atan2(y,x);
+    if(r>1){plate[iy*N+ix]=0;continue;}
+    plate[iy*N+ix]=(1-mix)*besselJ(nA,z1*r)*Math.cos(nA*th)+mix*besselJ(nA,z2*r)*Math.cos(nA*th+Math.PI/nA*.3);
+  }
+}
+function buildMask(){
+  const ps=+document.getElementById('pSize').value/100;const[pcx,pcy]=pXY();
+  for(let iy=0;iy<N;iy++)for(let ix=0;ix<N;ix++){const dx=ix/N-pcx,dy=iy/N-pcy;mask[iy*N+ix]=Math.sqrt(dx*dx+dy*dy)>ps?1:0;}
+}
+
+// Full azimuthal decomposition with cos AND sin coefficients
+const nMax=12;
+function azDecompFull(data){
+  const cosC=new Float64Array(nMax+1),sinC=new Float64Array(nMax+1);
+  const norm=new Float64Array(nMax+1);
+  for(let iy=0;iy<N;iy++)for(let ix=0;ix<N;ix++){
+    const x=(ix-N/2)/(N/2),y=(iy-N/2)/(N/2),r=Math.sqrt(x*x+y*y);
+    if(r<.05||r>1)continue;
+    const th=Math.atan2(y,x),v=data[iy*N+ix];
+    for(let n=0;n<=nMax;n++){cosC[n]+=v*Math.cos(n*th);sinC[n]+=v*Math.sin(n*th);norm[n]++;}
+  }
+  for(let n=0;n<=nMax;n++){if(norm[n]>0){cosC[n]/=norm[n];sinC[n]/=norm[n];}}
+  return{cos:cosC,sin:sinC};
+}
+
+function buildGhostField(){
+  const nA=+document.getElementById('nAz').value,nR=+document.getElementById('nRad').value;
+  const trD=azDecompFull(plate);
+  const mkD=azDecompFull(masked);
+
+  // Ghost = masked coefficients minus true coefficients, but ONLY for n \u2260 nA
+  // This isolates the fabricated modes, excluding the true mode amplitude change
+  for(let iy=0;iy<N;iy++)for(let ix=0;ix<N;ix++){
+    const x=(ix-N/2)/(N/2),y=(iy-N/2)/(N/2),r=Math.sqrt(x*x+y*y),th=Math.atan2(y,x);
+    if(r>1){ghostField[iy*N+ix]=0;continue;}
+    let z=0;
+    for(let n=0;n<=nMax;n++){
+      if(n===nA)continue; // exclude true mode entirely
+      const dC=mkD.cos[n]-trD.cos[n];
+      const dS=mkD.sin[n]-trD.sin[n];
+      // reconstruct spatially using this mode's radial profile
+      const zn=gz(Math.min(n,8),Math.min(nR,6));
+      const radial=besselJ(Math.min(n,8),zn*r);
+      z+=(dC*Math.cos(n*th)+dS*Math.sin(n*th))*radial;
+    }
+    ghostField[iy*N+ix]=z;
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,CW,CH);
+  samplePlate();buildMask();
+  for(let i=0;i<NN;i++)masked[i]=mask[i]?plate[i]:0;
+  buildGhostField();
+
+  const x1=LM,x2=LM+halfW+8;
+  const nA=+document.getElementById('nAz').value;
+  const trD=azDecompFull(plate),mkD=azDecompFull(masked);
+  const trP=new Float64Array(nMax+1),mkP=new Float64Array(nMax+1);
+  for(let n=0;n<=nMax;n++){trP[n]=Math.sqrt(trD.cos[n]**2+trD.sin[n]**2)*1e3;mkP[n]=Math.sqrt(mkD.cos[n]**2+mkD.sin[n]**2)*1e3;}
+
+  // Row 1: clean | masked
+  drawCirc(x1,r1y,halfW,panH,plate,cymCol,'True eigenmode (n='+nA+')',false,'pure mode');
+  drawCirc(x2,r1y,halfW,panH,masked,cymCol,'Measured (with blind patch)',true,null);
+
+  // Row 2: bar chart | ghost field (isolated phantoms only)
+  ctx.save();rrC(x1,r2y,halfW,panH,RR);ctx.clip();
+  ctx.fillStyle=isDark?'rgb(20,18,28)':'rgb(15,12,22)';ctx.fillRect(x1,r2y,halfW,panH);
+
+  const pad=28,gw=halfW-pad*2,gh=panH-pad*2-8;
+  const barW=gw/(nMax+1)-2;
+  let pMax=0;for(let i=0;i<=nMax;i++){pMax=Math.max(pMax,trP[i],mkP[i]);}
+  if(pMax<.001)pMax=1;
+
+  for(let n=0;n<=nMax;n++){
+    const bx=x1+pad+n*(barW+2);
+    const tH=trP[n]/pMax*gh,mH=mkP[n]/pMax*gh;
+    ctx.fillStyle='rgba(60,120,255,0.7)';
+    ctx.fillRect(bx,r2y+pad+gh-tH,barW/2-1,tH);
+    ctx.fillStyle=n===nA?'rgba(255,180,60,0.7)':'rgba(255,60,60,0.8)';
+    ctx.fillRect(bx+barW/2+1,r2y+pad+gh-mH,barW/2-1,mH);
+    if(n!==nA&&mkP[n]>pMax*.015){
+      ctx.fillStyle='rgba(255,60,60,0.9)';ctx.font='500 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText('\u2605',bx+barW/2,r2y+pad+gh-mH-6);
+    }
+    ctx.fillStyle=n===nA?'rgba(255,200,80,0.9)':txtCol;
+    ctx.font='400 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText(''+n,bx+barW/2,r2y+pad+gh+12);
+  }
+  // Ghost energy percentage: sum squared amplitudes (energy ∝ |ĉ|²), not amplitudes
+  let ghostE=0,totalE=0;
+  for(let n=0;n<=nMax;n++){totalE+=mkP[n]**2;if(n!==nA)ghostE+=mkP[n]**2;}
+  const ghostPct=totalE>0?Math.round(ghostE/totalE*100):0;
+
+  ctx.font='400 11px sans-serif';
+  ctx.fillStyle='rgba(60,120,255,0.8)';ctx.textAlign='left';ctx.fillText('true',x1+pad,r2y+pad+10);
+  ctx.fillStyle='rgba(255,60,60,0.8)';ctx.fillText('masked',x1+pad+32,r2y+pad+10);
+  ctx.fillStyle='rgba(255,60,60,0.9)';ctx.fillText('\u2605 phantom ('+ghostPct+'% of energy)',x1+pad+78,r2y+pad+10);
+  ctx.fillStyle=txtCol;ctx.textAlign='center';ctx.fillText('azimuthal mode number',x1+halfW/2,r2y+pad+gh+24);
+
+  ctx.restore();
+  rrC(x1,r2y,halfW,panH,RR);ctx.strokeStyle=rimCol;ctx.lineWidth=1;ctx.stroke();
+  ctx.font='500 12px sans-serif';ctx.fillStyle=txtCol;ctx.textAlign='left';ctx.fillText('Mode decomposition',x1+4,r2y-4);
+  ctx.textAlign='right';ctx.font='400 11px sans-serif';ctx.fillStyle=dimCol;ctx.fillText('red \u2605 = fabricated by mask',x1+halfW-4,r2y-4);
+
+  // Ghost field with diverging colormap to show structure
+  const ghostCm=(t)=>{t=Math.max(0,Math.min(1,t));
+    if(t<.4){const s=t/.4;return[Math.round(10+s*20),Math.round(15+s*50),Math.round(80+s*120)];}
+    if(t<.6){const s=(t-.4)/.2;return[Math.round(30+s*10),Math.round(65+s*10),Math.round(200-s*170)];}
+    const s=(t-.6)/.4;return[Math.round(40+s*215),Math.round(75-s*40),Math.round(30+s*20)];
+  };
+  drawCirc(x2,r2y,halfW,panH,ghostField,ghostCm,'Phantom modes only (n\u2260'+nA+', isolated)',true,'blue/red = fabricated oscillation');
+
+  // Row 3: strongest ghost mode | what observer thinks is there
+  // Find dominant ghost mode
+  let domGhost=0,domGhostN=0;
+  for(let n=0;n<=nMax;n++){if(n===nA)continue;if(mkP[n]>domGhost){domGhost=mkP[n];domGhostN=n;}}
+
+  // render dominant ghost mode
+  const domField=new Float64Array(NN);
+  const nR=+document.getElementById('nRad').value;
+  const zn=gz(Math.min(domGhostN,8),Math.min(nR,6));
+  const dC=mkD.cos[domGhostN]-trD.cos[domGhostN];
+  const dS=mkD.sin[domGhostN]-trD.sin[domGhostN];
+  for(let iy=0;iy<N;iy++)for(let ix=0;ix<N;ix++){
+    const x=(ix-N/2)/(N/2),y=(iy-N/2)/(N/2),r=Math.sqrt(x*x+y*y),th=Math.atan2(y,x);
+    if(r>1){domField[iy*N+ix]=0;continue;}
+    domField[iy*N+ix]=(dC*Math.cos(domGhostN*th)+dS*Math.sin(domGhostN*th))*besselJ(Math.min(domGhostN,8),zn*r);
+  }
+  drawCirc(x1,r3y,halfW,panH,domField,ghostCm,'Strongest phantom: n='+domGhostN,true,Math.round(domGhost/pMax*100)+'% of peak energy');
+
+  // Correct contaminated reconstruction: true mode is attenuated, plus ghost contribution.
+  // Attenuation factor = ratio of masked/true coefficient at the true mode nA.
+  const obsField=new Float64Array(NN);
+  const trueAmp=trP[nA],maskedAmp=mkP[nA];
+  const attenFactor=trueAmp>1e-6?maskedAmp/trueAmp:1;
+  for(let i=0;i<NN;i++)obsField[i]=attenFactor*plate[i]+ghostField[i];
+  drawCirc(x2,r3y,halfW,panH,obsField,cymCol,'What observer concludes (true mode attenuated + all ghosts)',true,'contaminated reconstruction');
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>
